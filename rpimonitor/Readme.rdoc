@@ -2,9 +2,9 @@
 
 Custom Configuration for RPi Monitor
 
-== Screens
+== Screenshot
 
-![Screenshot](https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png)
+{<img src="https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png"/>}[https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png]
 
 == Thanks to Xavier Berger
 

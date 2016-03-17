@@ -14,5 +14,6 @@ https://github.com/XavierBerger/RPi-Monitor
 
 - Follow the official guide to install
 - Copy all _this_ data  to `/etc/rpimonitor`
+- Copy bins/current_speed to you `$home/bins/current_speed`
 - Go to http://ip-address:8086
 - Enjoy

@@ -4,7 +4,7 @@ Custom Configuration for RPi Monitor
 
 == Screens
 
-![Screenshot](https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png)
+[https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png]
 
 == Thanks to Xavier Berger
 

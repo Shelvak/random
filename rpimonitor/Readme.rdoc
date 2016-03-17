@@ -1,0 +1,18 @@
+= RPi Monitor
+
+Custom Configuration for RPi Monitor
+
+== Screens
+
+![Screenshot](https://raw.githubusercontent.com/Shelvak/random/master/rpimonitor/screenshot.png)
+
+== Thanks to Xavier Berger
+
+https://github.com/XavierBerger/RPi-Monitor
+
+== Installation
+
+- Follow the official guide to install
+- Copy all _this_ data  to `/etc/rpimonitor`
+- Go to http://ip-address:8086
+- Enjoy

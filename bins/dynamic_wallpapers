@@ -1,0 +1,27 @@
+#!/bin/env ruby
+#### Change background in gnome3 && plasma
+
+backgrounds = '~/Imágenes/backgrounds'
+
+random_dir = `find #{backgrounds}/ -type d | shuf -n1`.strip
+random_pic = `find #{random_dir}/ | shuf -n1`.strip
+old_pic = `gsettings get org.gnome.desktop.background picture-uri`.strip.gsub('file://', '')
+#old_pic = `cat #{backgrounds}/.current_pic`.strip
+`echo "#{random_pic}" > #{backgrounds}/.current_pic`
+
+#js_script = 'var allDesktops = desktops();for (i=0;i<allDesktops.length;i++)'
+#js_script << '{d = allDesktops[i];d.wallpaperPlugin = "org.kde.image";d.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");'
+#js_script << "d.writeConfig(\"Image\", \"file://#{random_pic}\")}"
+
+session = `pgrep -U $(whoami) gnome-session`.strip
+#session = `pgrep -U $(whoami) plasmashell`.strip
+dbus_address = `grep -z DBUS_SESSION_BUS_ADDRESS /proc/#{session}/environ|cut -d= -f2-`.strip
+
+puts "Changing #{old_pic} => #{random_pic}..."
+`DBUS_SESSION_BUS_ADDRESS=#{dbus_address} gsettings set org.gnome.desktop.background picture-uri file://#{random_pic}`
+#`DBUS_SESSION_BUS_ADDRESS=#{dbus_address} qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '#{js_script}'`
+
+if ARGV && ARGV[0]
+  puts "Deleting #{old_pic}"
+  `mv #{old_pic} ~/Imágenes/a-borrar/`
+end

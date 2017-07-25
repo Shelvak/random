@@ -1,0 +1,5 @@
+#!/bin/zsh
+
+curl -s https://www.archlinux.org/mirrorlist/all/ | sed 's/^#Server/Server/' > /etc/pacman.d/full-list
+
+sudo su -c 'rankmirrors -n 6 /etc/pacman.d/full-list > /etc/pacman.d/mirrorlist'

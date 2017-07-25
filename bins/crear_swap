@@ -1,0 +1,7 @@
+#!/bin/bash
+dd if=/dev/zero of=/swapfile1 bs=4M count=1024
+
+chown root:root /swapfile1
+chmod 0600 /swapfile1
+mkswap /swapfile1
+swapon /swapfile1

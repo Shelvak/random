@@ -1,0 +1,65 @@
+#!/bin/zsh
+
+HELP=$(<<EOF
+  Use:
+  ./kube_remote.sh wispro-cloud
+  ./kube_remote.sh wispro-daemon
+  ./kube_remote.sh stats-service
+  ./kube_remote.sh notification-service
+  ./kube_remote.sh cert-service
+  ./kube_remote.sh cert-api
+  ./kube_remote.sh afip-sync-service
+  ./kube_remote.sh afip-async-service
+  ./kube_remote.sh influxdb
+EOF
+)
+
+if [ -z "$1" ]
+then
+    echo $HELP
+    exit 1
+fi
+
+# kubectl exec -it $(kubectl get pods |grep cloud-deploy | awk '{print $1}' |shuf |head -n1) bash
+
+case "$1" in
+    wispro-cloud)
+        container=$(kubectl get pods | grep Running | grep 'wispro-cloud-deployment' | shuf | head -n1 | awk '{ print $1 }' )
+        ;;
+    wispro-daemon)
+        container=$(kubectl get pods | grep Running | grep 'wispro-cloud-daemon-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    stats-service)
+        container=$(kubectl get pods | grep Running | grep 'stats-service-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    notification-service)
+        container=$(kubectl get pods | grep Running | grep 'notification-service-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    cert-service)
+        container=$(kubectl get pods | grep Running | grep 'cert-service-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    cert-api)
+        container=$(kubectl get pods | grep Running | grep 'cert-service-api-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    afip-sync-service)
+        container=$(kubectl get pods | grep Running | grep 'argentina-invoice-service-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    afip-async-service)
+        container=$(kubectl get pods | grep Running | grep 'argentina-invoice-service-async-deployment' | head -n1 | awk '{ print $1 }' )
+        ;;
+    influxdb)
+        container=$(kubectl get pods | grep Running | grep 'influxdb-production-influxdb' | head -n1 | awk '{ print $1 }' )
+        ;;
+    *)
+        echo $HELP
+        exit 1
+esac
+
+if [ ! -z "$container" ]
+then
+    echo "Attaching..."
+    kubectl exec -it $container /bin/bash
+else
+    echo "No hay ningun container"
+    exit 1
+fi

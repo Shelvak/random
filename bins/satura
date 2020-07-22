@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ip=$(ifconfig $1 | grep -o "inet addr:[^ ]*" | grep -o "[0-9][^ ]*")
-echo $1 $ip
+# ip=$(ifconfig $1 | grep -o "inet addr:[^ ]*" | grep -o "[0-9][^ ]*")
+# echo $1 $ip
 #tc qdisc del root dev $1
 for url in \
     http://download.xs4all.nl/test/1GB.bin \
@@ -29,9 +29,9 @@ for url in \
 do
     for times in $(seq 1 10)
     do
-        wget --quiet --bind-address=$ip  -O /dev/null $url &
+        wget --quiet --bind-address=192.168.0.7  -O /dev/null $url &
     done
 done
 
-iftop -i $1
+iftop -i enp4s0
 killall -9 wget

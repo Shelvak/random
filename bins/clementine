@@ -1,0 +1,4 @@
+#!/bin/zsh
+cp /home/rotsen/.config/Clementine/Clementine.conf-pulenta /home/rotsen/.config/Clementine/Clementine.conf
+
+clementine --verbose &>> /home/rotsen/.config/Clementine/clementine.log &

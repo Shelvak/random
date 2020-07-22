@@ -1,0 +1,71 @@
+#!/bin/zsh
+
+HELP=$(<<EOF
+  Use:
+  ./kube_logs.sh wispro-cloud
+  ./kube_logs.sh wispro-daemon
+  ./kube_logs.sh stats-service
+  ./kube_logs.sh mikrotik-service
+  ./kube_logs.sh notification-service
+  ./kube_logs.sh notification-service-async
+  ./kube_logs.sh cert-service
+  ./kube_logs.sh cert-api
+  ./kube_logs.sh afip-sync-service
+  ./kube_logs.sh afip-async-service
+EOF
+)
+
+if [ -z "$1" ]
+then
+    echo $HELP
+    exit 1
+fi
+
+# kubectl exec -it $(kubectl get pods |grep cloud-deploy | awk '{print $1}' |shuf |head -n1) bash
+
+case "$1" in
+    wispro-cloud)
+        containers=$(kubectl get pods -l app=wispro-cloud | grep Running | shuf | awk '{ print $1 }' )
+        ;;
+    wispro-daemon)
+        containers=$(kubectl get pods -l app=wispro-cloud-daemon | grep Running | awk '{ print $1 }' )
+        ;;
+    stats-service)
+        containers=$(kubectl get pods -l app=stats-service | grep Running | awk '{ print $1 }' )
+        ;;
+    notification-service)
+        containers=$(kubectl get pods -l app=notification-service | grep Running | grep 'notification-service-deployment' | awk '{ print $1 }' )
+        ;;
+    notification-service-async)
+        containers=$(kubectl get pods -l app=notification-service | grep Running | grep 'notification-service-async-eployment' | awk '{ print $1 }' )
+        ;;
+    mikrotik-service)
+        containers=$(kubectl get pods -l app=mikrotik-service | grep Running | awk '{ print $1 }' )
+        ;;
+    cert-service)
+        containers=$(kubectl get pods -l app=cert-service | grep Running | awk '{ print $1 }' )
+        ;;
+    cert-api)
+        containers=$(kubectl get pods -l app=cert-service-api | grep Running | grep 'cert-service-api-deployment' | awk '{ print $1 }' )
+        ;;
+    afip-sync-service)
+        containers=$(kubectl get pods -l app=argentina-invoice-service | grep Running | grep 'argentina-invoice-service-deployment' | awk '{ print $1 }' )
+        ;;
+    afip-async-service)
+        containers=$(kubectl get pods -l app=argentina-invoice-service | grep Running | grep 'argentina-invoice-service-async-deployment' | awk '{ print $1 }' )
+        ;;
+    *)
+        echo $HELP
+        exit 1
+esac
+
+if [ ! -z "$containers" ]
+then
+    lines=${2:-1000}
+    echo "Logging last $lines lines in \n $containers..."
+    # echo $containers | uniq | xargs -I{} --max-args=1 --max-procs=1 sh -c '{kubectl logs -f --tail=$lines {}}'
+    echo $containers | uniq | xargs -I{} --max-args=1 --max-procs=1 sh -c '{ kubectl delete pod {}; sleep 2; }'
+else
+    echo "No hay ningun container"
+    exit 1
+fi

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Working ^^"
+
+if [ -z "$1" ]; then
+  DIR=$( pwd )
+else
+  cd "$1"
+fi
+
+for pdf in *.pdf ; do
+  pdftops -level3 $pdf - | ps2ps - - | psbook | ps2pdf - - | lp -o media=a5 -o number-up=2 -o fit-to-page -t "${pdf%%.pdf}" -o ppi=1200
+done

@@ -10,6 +10,9 @@ TRUSTED_DOMAINS = [
   /^https:\/\/github.com\//
 ]
 
+DEFAULT_BROWSER = 'firefox'
+DEFAULT_PRIVATE_BROWSER = 'firefox -private-window'
+
 # Log to journal
 def log(string)
   `echo '#{string}' | systemd-cat -t custom-open-link`
@@ -17,15 +20,15 @@ end
 
 def drop_params(url)
   clean = url.match(/^(http.*)\?.*/)&.captures&.first
-  open(clean)
+  open(clean) if clean
 end
 
 def open(url)
-  `firefox #{url}`
+  `#{DEFAULT_BROWSER} #{url}`
 end
 
 def private_open(url)
-  `firefox -private-window #{url}`
+  `#{DEFAULT_PRIVATE_BROWSER} #{url}`
 end
 
 def filter_url(url)
@@ -38,6 +41,5 @@ def filter_url(url)
     private_open(url)
   end
 end
-
 
 filter_url ARGV[0]

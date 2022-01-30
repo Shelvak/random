@@ -1,0 +1,10 @@
+[Unit]
+Description=Toggle Office lights
+
+[Service]
+BusName=org.gnome.ScreenSaver
+ExecStart=/home/rotsen/bins/listen_to_lock_or_unlock.sh
+Type=simple
+
+[Install]
+WantedBy=default.target

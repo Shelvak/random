@@ -1,0 +1,13 @@
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Type=Package
+Target=python
+Target=python-pip
+
+[Action]
+Description=Reinstall flexget dependencies
+Depends=python-pip
+When=PostTransaction
+NeedsTargets
+Exec=/media/Torrents/.flexget/install.sh

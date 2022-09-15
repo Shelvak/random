@@ -5,6 +5,7 @@ The main idea is to prevent tracking & pages with lot of cookies in the main bro
 ```bash
 cp custom-open-link.desktop ~/.local/share/applications/custom-open-link.desktop
 cp custom_open_link.rb ~/bins/custom_open_link.rb
+cp config.example.yml config.yml
 ```
 
 ## Edit default mimeapp
@@ -13,5 +14,11 @@ cp custom_open_link.rb ~/bins/custom_open_link.rb
   - x-scheme-handler/http=custom-open-link.desktop;
   - text/html=custom-open-link.desktop;
   - x-scheme-handler/https=custom-open-link.desktop;
+
+## Change config
+- `default`: Default browser command
+- `private`: Default private browser command (default command for unknown domains)
+- `drop_params`: Url/domains to drop params (to skip "traking")
+- `custom_domains`: `command: domains/urls*` mapping for custom url => browser
 
 ## Restart Gnome

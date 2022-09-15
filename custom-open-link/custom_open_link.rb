@@ -1,26 +1,14 @@
 #!/home/rotsen/.rubies/ruby-2.6.8/bin/ruby
 
-# Ignore params to skip "tracking"
-DROP_PARAMS_DOMAINS = [
-  /^https:\/\/twitter\.com\//
-]
+require 'yaml'
 
-# 100% trusted domains
-TRUSTED_DOMAINS = [
-  /^https:\/\/github\.com\//,
-  /^https:\/\/.*cloud\.wispro\.co\//,
-  /^https:\/\/docs\.google\.com\//
-]
+CONFIG = YAML.load(
+  File.read(
+    File.expand_path(File.dirname(__FILE__))
+  )
+) rescue {}
 
-# Links to open with alternative browser
-ALT_BROWSER_DOMAINS = [
-  /^https:\/\/app\.\//,
-  /^https:\/\/\S+\.finance/
-]
-
-DEFAULT_BROWSER = 'firefox'
-DEFAULT_PRIVATE_BROWSER = 'firefox -private-window'
-ALT_BROWSER = 'google-chrome-stable'
+CONFIG = YAML.load(File.read('./config.yml'))
 
 # Log to journal
 def log(string)
@@ -30,38 +18,41 @@ end
 
 def drop_params(url)
   clean = url.split('?').first
-  open(clean) if clean
+
+  clean || url
 end
 
 def open(url)
-  log("Opening: #{url}")
-  `#{DEFAULT_BROWSER} #{url}`
-end
+  command = command_for(url)
 
-def private_open(url)
-  log("Opening: #{url}")
-  `#{DEFAULT_PRIVATE_BROWSER} #{url}`
-end
-
-def alt_open(url)
-  log("Opening: #{url}")
-  `#{ALT_BROWSER} #{url}`
+  log("Opening with #{command} #{url}")
+  `#{command} #{url}`
 end
 
 def filter_url(url)
   case url
-  when *DROP_PARAMS_DOMAINS then drop_params(url)
-  when *TRUSTED_DOMAINS then open(url)
-  when *ALT_BROWSER_DOMAINS then alt_open(url)
+  when *CONFIG['drop_params'] then drop_params(url)
   else
-    log("Unknown: #{url}")
+    url
+  end
+end
 
-    private_open(url)
+def command_for(url)
+  if CONFIG['trusted_domains']&.any? { |d| d.match?(url) }
+    CONFIG['default']
+  elsif (cd = CONFIG['custom_domains'])&.any?
+    cd.each do |cmd, domains|
+      return cmd if domains.any? { |d| d.match?(url) }
+    end
+  else
+    CONFIG['private']
   end
 end
 
 begin
-  filter_url ARGV[0]
+  url = filter_url(ARGV[0])
+
+  open url
 rescue ::Exception => e
   `echo '#{e}' >> /tmp/custom-open-link`
 end

@@ -44,7 +44,9 @@ class AutoKill():
 
         self.ataques = 0
         # argv will only be used for fuel from the moment
-        self.use_fuel = (len(sys.argv) == 1)
+        # print(sys.argv)
+        self.use_fuel = True # (len(sys.argv) == 1)
+        self.home = None
         # self.time = now()
 
     def autokill(self):
@@ -74,6 +76,8 @@ class AutoKill():
         self.autokill()
 
     def atacar(self):
+        self.home = self.home or self.get_current_coords()
+
         puts("Attacking...")
         ## Aca boton verde
         self.device.touchDip(380.19, 582.86, 0)
@@ -82,12 +86,20 @@ class AutoKill():
 
         ## Confirmar busqueda
         self.device.touchDip(367.24, 678.1, 0)
-
         self.vc.sleep(3)
-
         # Click en bicho
         self.device.touchDip(209.52, 335.24, 0)
         self.vc.sleep(1)
+
+        coords = self.get_current_coords()
+
+        # si no encontro una goma
+        if coords is not None and self.home is not None and coords == self.home:
+            puts("no se encontro monstruo")
+            self.vc.sleep(15)
+            # volver a intentar
+            return self.atacar()
+
         self.device.touchDip(209.52, 335.24, 0)
         self.vc.sleep(1)
 
@@ -102,6 +114,14 @@ class AutoKill():
 
         # Confirmar
         self.attack_time = self.get_flew_time()
+
+        # Maximo 5 minutos
+        if self.attack_time > (5 * 60):
+            puts("Muy lejos")
+            self.device.press('BACK')
+            self.vc.sleep(10)
+            return self.atacar()
+
         self.device.touchDip(364.95, 701.71, 0)
         self.attacking_until = now() + (self.attack_time * 2)
         self.vc.sleep(2)
@@ -222,15 +242,18 @@ class AutoKill():
             return parts[0]
 
     def heal_ready(self):
-        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-        device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+        try:
+            kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
+            device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 
-        ss = device.takeSnapshot()
-        results = device.imageToData(
-            ss.crop((704,1210,704+271,1210+157)).convert("L") # cortar el tiempo y monocromear
-        )['text']
+            ss = device.takeSnapshot()
+            results = device.imageToData(
+                ss.crop((785,1307,785+121,1307+38)).convert("L") # cortar el tiempo y monocromear
+            )['text']
 
-        return 'Curacion' not in results
+            return len(list(filter(lambda e: (re.match(r"Cura", e)), results))) > 0
+        except:
+            return False
 
     def get_flew_time(self):
         kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
@@ -267,6 +290,58 @@ class AutoKill():
             return self.get_current_fuel(retries + 1)
 
 
+    def get_current_coords(self):
+        try:
+            coords = []
+            values = self.take_screenshot((387,1585,387+250,1585+41))
+
+            for r_v in values:
+                try:
+                    v = int(r_v)
+                    coords.append(v)
+                except:
+                    pass
+
+            puts("coords: " + str(coords))
+            return coords
+
+        except Exception as e:
+            puts(str(e))
+            return
+
+    def take_screenshot(self, coords):
+        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
+        device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+
+        ss = device.takeSnapshot()
+        r = device.imageToData(ss.crop(coords).convert("L"))['text']
+        puts("resultado: " + str(r))
+        return r
+
+
+def start():
+    try:
+        auto = AutoKill()
+        auto.autokill()
+    except Exception as e:
+        puts(str(e))
+        puts("Bombaso")
+        time.sleep(120)
+        auto.device.press('BACK')
+        time.sleep(1)
+        auto.device.press('BACK')
+        time.sleep(1)
+        auto.device.press('BACK')
+        time.sleep(1)
+        auto.device.press('BACK')
+        time.sleep(1)
+        auto.device.press('BACK')
+        time.sleep(1)
+        auto.device.touchDip(389.33, 38.86, 0)
+        time.sleep(1)
+        auto.device.touchDip(389.33, 38.86, 0)
+        auto.device.close()
+        start()
+
 if __name__ == "__main__":
-    auto = AutoKill()
-    auto.autokill()
+    start()

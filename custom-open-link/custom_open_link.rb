@@ -3,12 +3,8 @@
 require 'yaml'
 
 CONFIG = YAML.load(
-  File.read(
-    File.expand_path(File.dirname(__FILE__))
-  )
+  File.read(ENV['HOME'] + '/.custom_links.yml')
 ) rescue {}
-
-CONFIG = YAML.load(File.read('./config.yml'))
 
 # Log to journal
 def log(string)
@@ -38,15 +34,20 @@ def filter_url(url)
 end
 
 def command_for(url)
+  log("Command for: #{url}")
+
   if CONFIG['trusted_domains']&.any? { |d| d.match?(url) }
-    CONFIG['default']
-  elsif (cd = CONFIG['custom_domains'])&.any?
+    return CONFIG['default']
+  end
+
+  if (cd = CONFIG['custom_domains'])&.any?
     cd.each do |cmd, domains|
+      log("#{cmd} for #{domains}")
       return cmd if domains.any? { |d| d.match?(url) }
     end
-  else
-    CONFIG['private']
   end
+
+  CONFIG['private']
 end
 
 begin

@@ -18,10 +18,13 @@ ___________________/  /__/  /__/  /__/  /________________________________
 import os
 import re
 import sys
-import time
+from time import sleep
 from datetime import datetime
 
 from com.dtmilano.android.viewclient import ViewClient, KEY_EVENT
+
+class Retry(Exception):
+    pass
 
 def puts(msg):
     print(str(datetime.now().strftime("[%d/%m/%Y %H:%M:%S] ")) + msg)
@@ -33,11 +36,16 @@ def now():
     # getting the timestamp
     return datetime.timestamp(dt)
 
+def connect():
+    kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False, 'serialno': os.environ.get('SERIAL')}
+    device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+
+    return [device, serialno]
+
 
 class AutoKill():
     def __init__(self):
-        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-        self.device, self.serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+        self.device, self.serialno = connect()
 
         kwargs2 = {'forceviewserveruse': False, 'startviewserver': True, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': True, 'useuiautomatorhelper': False, 'debug': {}}
         self.vc = ViewClient(self.device, self.serialno, **kwargs2)
@@ -80,137 +88,126 @@ class AutoKill():
 
         puts("Attacking...")
         ## Aca boton verde
+        puts("Boton verde")
         self.device.touchDip(380.19, 582.86, 0)
 
-        self.vc.sleep(1)
+        sleep(1)
 
         ## Confirmar busqueda
+        puts("Confirmar busqueda")
         self.device.touchDip(367.24, 678.1, 0)
-        self.vc.sleep(3)
+        sleep(2)
         # Click en bicho
-        self.device.touchDip(209.52, 335.24, 0)
-        self.vc.sleep(1)
+        puts("Doble Click en bicho")
+        self.device.touchDip(190.48, 303.24, 0)
+        self.device.touchDip(190.48, 303.24, 0)
+        sleep(1)
 
         coords = self.get_current_coords()
 
         # si no encontro una goma
         if coords is not None and self.home is not None and coords == self.home:
             puts("no se encontro monstruo")
-            self.vc.sleep(15)
-            # volver a intentar
-            return self.atacar()
+            raise Retry()
 
-        self.device.touchDip(209.52, 335.24, 0)
-        self.vc.sleep(1)
+        # Atacar al bicho
+        self.device.touchDip(204.95, 491.43, 0)
+        sleep(1)
 
-        # Atacar
-        self.device.touchDip(224.76, 486.86, 0)
-        self.vc.sleep(2)
+        # Check if somebody is attacking
+        print("Ahora viene el checkeo")
+        # if len(set(['Cancelar', 'Cancel']) & set(self.take_screenshot((260, 980, 260+500, 980+120)))) > 0:
+        #     self.device.touchDip(300, 1020, 0)
+        #     return self.atacar()
+
+        # Obtener tiempo de ataque
+        try:
+            self.attack_time = self.get_flew_time()
+        except:
+            raise Retry()
+
+        # Maximo n minutos
+        if self.attack_time > (10 * 60):
+            raise Retry()
 
         # Click en formacion 2
-        # self.device.touchDip(158.48, 35.81, 0)
         self.device.touchDip(184.38, 137.14, 0)
-        self.vc.sleep(1)
+        sleep(0.5)
 
-        # Confirmar
-        self.attack_time = self.get_flew_time()
-
-        # Maximo 5 minutos
-        if self.attack_time > (5 * 60):
-            puts("Muy lejos")
-            self.device.press('BACK')
-            self.vc.sleep(10)
-            return self.atacar()
-
+        # Confirmar ataque
         self.device.touchDip(364.95, 701.71, 0)
         self.attacking_until = now() + (self.attack_time * 2)
-        self.vc.sleep(2)
+        sleep(2)
 
     def click_en_casa_o_mapa(self):
         puts("Click en casa o mapa")
 
         # Casa
         self.device.touchDip(42.67, 691.05, 0)
-        self.vc.sleep(3)
+        sleep(3)
 
-    def curar_y_esperar(self):
+    def curar_y_esperar(self, retry=0):
         puts("Curando")
         # Click en + hospital
         self.device.touchDip(331.43, 409.14, 0)
-        self.vc.sleep(1)
+        sleep(1)
         self.device.touchDip(331.43, 409.14, 0)
-        self.vc.sleep(2)
+        sleep(2)
         # Confirmar
-        heal_time = self.get_heal_time()
+        heal_time = self.get_heal_time(retry)
 
         if (heal_time < self.attack_time):
             heal_time = self.attack_time
 
         self.device.touchDip(369.52, 695.62, 0)
-        self.vc.sleep(1)
+        sleep(1)
         # Pedir ayuda
         self.device.touchDip(331.43, 409.14, 0)
-        self.vc.sleep(1)
+        sleep(1)
         self.device.touchDip(331.43, 409.14, 0)
         self.wait_and_help(heal_time, 'heal')
         # Sacar los wachines
         self.device.touchDip(331.43, 409.14, 0)
-        self.vc.sleep(1)
+        sleep(1)
 
 
     def cargar_combustible(self):
         puts("Checkeando combustible")
         # Click en parte de combustible
         self.device.touchDip(79.24, 45.71, 0)
-        self.vc.sleep(1)
+        sleep(1)
 
         if (self.get_current_fuel() < 20):
             puts("Cargando combustible...")
             # Click en 1er usar
             self.device.touchDip(329.14, 285.71, 0)
-            self.vc.sleep(1)
+            sleep(1)
 
             # Confirmar
             self.device.touchDip(207.24, 395.43, 0)
-            self.vc.sleep(1)
+            sleep(1)
 
         # Click fuera del modal
         self.device.touchDip(158.48, 91.43, 0)
-        self.vc.sleep(1)
-
-    def necesita_combustible(self):
-        # ahora = now()
-
-        # cada 1 hora, skippeamos junto con los ataques
-        # if (ahora - self.time) > 3600 and (self.ataques % 2) == 0:
-        #     puts(str(ahora) + " Pasaron 3 horas... reseteando")
-        #     self.time = ahora
-        #     self.ataques = 0
-        #     return False
-
-        # cada 3 ataques
-        return ((self.ataques % 3) == 2)
-            # return
-
-        # return True
+        sleep(1)
 
     def help(self):
         # Click en Alianza
         self.device.touchDip(321.52, 691.81, 0)
-        self.vc.sleep(1)
+        sleep(1)
         # Click en Ayuda
         self.device.touchDip(232.38, 521.14, 0)
-        self.vc.sleep(2)
+        sleep(2)
 
         # Click en Ayudar
         self.device.touchDip(219.43, 690.29, 0)
-        self.vc.sleep(1)
+        sleep(1)
         # Click en Volver(a alianza)
         self.device.touchDip(41.14, 19.05, 0)
-        self.vc.sleep(1)
+        sleep(1)
         # Click en Volver(a donde estaba)
         self.device.touchDip(24.38, 25.14, 0)
-        self.vc.sleep(1)
+        sleep(1)
 
     def wait_and_help(self, time, kind):
         puts("Waiting " + str(time) + "s & helping")
@@ -220,44 +217,57 @@ class AutoKill():
             self.help()
             if (kind == 'heal' and self.attack_ready() and self.heal_ready()):
                 return
-            self.vc.sleep(5)
+            sleep(5)
 
     def attack_ready(self):
         return (now() >= self.attacking_until)
 
-    def get_heal_time(self):
-        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-        device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+    def get_heal_time(self, retry):
+        try:
+            device, _serialno = connect()
 
-        ss = device.takeSnapshot()
-        raw_time = device.imageToData(
-            ss.crop((747,1635,747+178, 1635+84)).convert("L") # cortar el tiempo y monocromear
-        )['text'][-1]
+            ss = device.takeSnapshot()
+            raw_time = device.imageToData(
+                ss.crop((747,1635,747+178, 1635+84)).convert("L") # cortar el tiempo y monocromear
+            )['text'][-1]
 
-        parts = list(map(lambda n: int(n), raw_time.split(':')))
+            parts = list(map(lambda n: int(n), raw_time.split(':')))
 
-        if len(parts) == 2:
-            return parts[0] * 60 + parts[1]
-        else:
-            return parts[0]
+            if len(parts) == 2:
+                return parts[0] * 60 + parts[1]
+            else:
+                return parts[0]
+        except:
+            return self.attack_time
+
+            # puts("Bombaso en curar...")
+            # sleep(1)
+            # self.device.press('BACK')
+            # sleep(1)
+            # self.device.press('BACK')
+            # sleep(1)
+            # self.device.press('BACK')
+            # sleep(1)
+            # # Click fuera del modal
+            # self.device.touchDip(158.48, 91.43, 0)
+            # return self.get_heal_time(retry + 1)
 
     def heal_ready(self):
         try:
-            kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-            device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+            device, _serialno = connect()
 
             ss = device.takeSnapshot()
             results = device.imageToData(
                 ss.crop((785,1307,785+121,1307+38)).convert("L") # cortar el tiempo y monocromear
             )['text']
+            puts("curando", str(results))
 
             return len(list(filter(lambda e: (re.match(r"Cura", e)), results))) > 0
         except:
             return False
 
     def get_flew_time(self):
-        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-        device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+        device, _serialno = connect()
 
         ss = device.takeSnapshot()
         raw_time = device.imageToData(
@@ -273,11 +283,10 @@ class AutoKill():
 
     def get_current_fuel(self, retries = 0):
         if retries > 2:
-            return False
+            return 100 # fake false condition
 
         try:
-            kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-            device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+            device, _serialno = connect()
 
             ss = device.takeSnapshot()
             return int(
@@ -286,7 +295,7 @@ class AutoKill():
                 )['text'][-1]
             )
         except:
-            self.vc.sleep(1)
+            sleep(1)
             return self.get_current_fuel(retries + 1)
 
 
@@ -310,12 +319,11 @@ class AutoKill():
             return
 
     def take_screenshot(self, coords):
-        kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'ignoreversioncheck': False}
-        device, _serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
+        device, _serialno = connect()
 
         ss = device.takeSnapshot()
         r = device.imageToData(ss.crop(coords).convert("L"))['text']
-        puts("resultado: " + str(r))
+        puts("Agarramos el confirm?? resultado: " + str(r))
         return r
 
 
@@ -323,25 +331,25 @@ def start():
     try:
         auto = AutoKill()
         auto.autokill()
+    except Retry as e:
+        auto.device.press('BACK')
+        sleep(1)
+        auto.device.press('BACK')
+        auto.device.press('BACK')
+        auto.device.touchDip(389.33, 38.86, 0)
+        auto.help()
+        auto.autokill()
     except Exception as e:
-        puts(str(e))
         puts("Bombaso")
-        time.sleep(120)
+        puts(str(e))
+        sleep(60)
         auto.device.press('BACK')
-        time.sleep(1)
+        sleep(1)
         auto.device.press('BACK')
-        time.sleep(1)
         auto.device.press('BACK')
-        time.sleep(1)
-        auto.device.press('BACK')
-        time.sleep(1)
-        auto.device.press('BACK')
-        time.sleep(1)
         auto.device.touchDip(389.33, 38.86, 0)
-        time.sleep(1)
         auto.device.touchDip(389.33, 38.86, 0)
-        auto.device.close()
-        start()
+        auto.autokill()
 
 if __name__ == "__main__":
     start()

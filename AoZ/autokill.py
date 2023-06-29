@@ -22,6 +22,7 @@ from time import sleep
 from datetime import datetime
 
 from com.dtmilano.android.viewclient import ViewClient, KEY_EVENT
+import pytesseract
 
 class Retry(Exception):
     pass
@@ -71,7 +72,8 @@ class AutoKill():
         # Esperar a que llegue el ataque
         self.wait_and_help(self.attack_time, 'attack')
 
-        self.curar_y_esperar()
+        self.wait_and_help(self.attack_time, 'heal')
+        # self.curar_y_esperar()
 
         self.help()
 
@@ -127,12 +129,12 @@ class AutoKill():
             raise Retry()
 
         # Maximo n minutos
-        if self.attack_time > (10 * 60):
+        if self.attack_time > (6 * 60):
             raise Retry()
 
         # Click en formacion 2
-        self.device.touchDip(184.38, 137.14, 0)
-        sleep(0.5)
+        # self.device.touchDip(184.38, 137.14, 0)
+        # sleep(0.5)
 
         # Confirmar ataque
         self.device.touchDip(364.95, 701.71, 0)
@@ -188,7 +190,8 @@ class AutoKill():
             sleep(1)
 
         # Click fuera del modal
-        self.device.touchDip(158.48, 91.43, 0)
+        # self.device.touchDip(158.48, 91.43, 0)
+        self.device.touchDip(161.52, 89.14, 0)
         sleep(1)
 
     def help(self):
@@ -196,7 +199,7 @@ class AutoKill():
         self.device.touchDip(321.52, 691.81, 0)
         sleep(1)
         # Click en Ayuda
-        self.device.touchDip(232.38, 521.14, 0)
+        self.device.touchDip(220.38, 489.14, 0)
         sleep(2)
 
         # Click en Ayudar
@@ -333,12 +336,16 @@ def start():
         auto.autokill()
     except Retry as e:
         auto.device.press('BACK')
+        auto.device.press('BACK')
         sleep(1)
         auto.device.press('BACK')
         auto.device.press('BACK')
-        auto.device.touchDip(389.33, 38.86, 0)
+        # auto.device.touchDip(389.33, 38.86, 0)
+        # auto.device.touchDip(161.52, 89.14, 0)
+        auto.device.touchDip(158.48, 91.43, 0)
+        auto.device.touchDip(158.48, 91.43, 0)
         auto.help()
-        auto.autokill()
+        start()
     except Exception as e:
         puts("Bombaso")
         puts(str(e))
@@ -347,9 +354,12 @@ def start():
         sleep(1)
         auto.device.press('BACK')
         auto.device.press('BACK')
-        auto.device.touchDip(389.33, 38.86, 0)
-        auto.device.touchDip(389.33, 38.86, 0)
-        auto.autokill()
+        auto.device.touchDip(158.48, 91.43, 0)
+        # auto.device.touchDip(389.33, 38.86, 0)
+        # auto.device.touchDip(389.33, 38.86, 0)
+        # auto.device.touchDip(161.52, 89.14, 0)
+        # auto.device.touchDip(161.52, 89.14, 0)
+        start()
 
 if __name__ == "__main__":
     start()

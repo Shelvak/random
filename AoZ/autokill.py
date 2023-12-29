@@ -56,6 +56,7 @@ class AutoKill():
         # print(sys.argv)
         self.use_fuel = True # (len(sys.argv) == 1)
         self.home = None
+        self.lastDonation = now()
         # self.time = now()
 
     def autokill(self):
@@ -74,6 +75,8 @@ class AutoKill():
 
         self.wait_and_help(self.attack_time, 'heal')
         # self.curar_y_esperar()
+        if (now() - self.lastDonation) >= 9000: # 10 donations
+            self.donate()
 
         self.help()
 
@@ -129,7 +132,7 @@ class AutoKill():
             raise Retry()
 
         # Maximo n minutos
-        if self.attack_time > (6 * 60):
+        if self.attack_time > (3 * 60):
             raise Retry()
 
         # Click en formacion 2
@@ -329,6 +332,37 @@ class AutoKill():
         puts("Agarramos el confirm?? resultado: " + str(r))
         return r
 
+    def donate(self):
+        puts("Donating...")
+        # Click en Alianza
+        self.device.touchDip(318.48, 694.1, 0)
+        sleep(1)
+        # Click en Tecnologia
+        self.device.touchDip(200.38, 592.0, 0)
+        sleep(1)
+        # Click en primera tecnologia
+        self.device.touchDip(240.0, 176.76, 0)
+        sleep(0.5)
+        # 4 clicks
+        self.device.touchDip(81.52, 466.29, 0)
+        sleep(0.5)
+        self.device.touchDip(81.52, 466.29, 0)
+        sleep(0.5)
+        self.device.touchDip(81.52, 466.29, 0)
+        sleep(0.5)
+        self.device.touchDip(81.52, 466.29, 0)
+        sleep(0.5)
+        # Aceptar full donation
+        # self.device.touchDip(156.95, 470.86, 0)
+        self.device.touchDip(69.33, 404.57, 0)
+        sleep(0.5)
+        # Click fuera
+        self.device.press('BACK')
+        sleep(0.5)
+        self.device.press('BACK')
+        sleep(0.5)
+
+        self.lastDonation = now()
 
 def start():
     try:

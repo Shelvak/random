@@ -22,7 +22,7 @@ def open(url)
   command = command_for(url)
 
   log("Opening with #{command} #{url}")
-  `#{command} #{url}`
+  `#{command} "#{url}"`
 end
 
 def filter_url(url)

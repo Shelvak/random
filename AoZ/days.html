@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age of Origin</title>
+        <script>
+          let lang = navigator.language || navigator.userLanguage || 'en';A
+          if (! lang in ["es", "en", "fr", "it"]) lang = 'en';
+
+          let daysOfWeek = {
+            "es": ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+            "en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+            "fr": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
+            "it": ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"]
+          }
+          let texts = {
+            "es": { "main-title": "Calcular tiempo de construcción", "Example": "Colocar tiempo de construccion:", "result": "El tiempo de construccion finalizara el "},
+            "en": { "main-title": "Calculate construction time", "Example": "Place construction time:", "result": "The construction time will end on "},
+            "fr": { "main-title": "Calculer le temps de construction", "Example": "Placez le temps de construction:", "result": "Le temps de construction se terminera le "},
+            "it": { "main-title": "Calcola il tempo di costruzione", "Example": "Inserisci il tempo di costruzione:", "result": "Il tempo di costruzione terminerà il "},
+          }
+
+          function calculateDay() {
+            let allianceHelp = 60 * 60 * 1000; // one hour
+            let value = document.getElementById("hours").value;
+            let currentDate = new Date();
+            let timeR, days, hours, minutes, seconds;
+            // split hours variable in hours:minutes:seconds
+            // parse value variable with the format Dd hh:mm:ss
+            if (value.split(" ").length > 1){
+              [daysR, timeR] = value.split(" ")
+              // with regex get the first digit of the string
+              days = Number(daysR.match(/^\d+/)[0]);
+            } else {
+              days = 0;
+              timeR = value;
+            }
+
+            let time = timeR.split(":").map(Number);
+
+            if (time.length == 3) {
+              [hours, minutes, seconds] = time;
+              console.log(hours, minutes, seconds);
+            } else {
+              [minutes, seconds] = time;
+              hours = 0;
+            }
+
+            let futureDate = new Date(currentDate.getTime() + (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000) + (seconds * 1000) - allianceHelp);
+            let day = futureDate.getDay();
+
+            document.getElementById("result").innerText = texts[lang]['result'] + daysOfWeek[futureDate.getDay()] + ' => ' + futureDate.toLocaleString();
+            return false;
+          }
+
+        </script>
+
+</head>
+<body>
+  <h1 id="main-title"></h1>
+  <p id="Example"></p>
+  <form onsubmit="return calculateDay()">
+    <input type="text" id="hours"></br> </br>
+    <button style="font-size: 40px;" >&#128640; &#x1F680;</button>
+  </form>
+  <p id="result"></p>
+
+</body>
+</html>

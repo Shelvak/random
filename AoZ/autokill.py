@@ -54,7 +54,7 @@ class AutoKill():
         self.ataques = 0
         # argv will only be used for fuel from the moment
         # print(sys.argv)
-        self.use_fuel = True # (len(sys.argv) == 1)
+        self.use_fuel = False # (len(sys.argv) == 1)
         self.home = None
         self.lastDonation = now()
         # self.time = now()

@@ -1,0 +1,45 @@
+Cañon de uranio t9 230 x 5 (1d 00:07:15)
+Franco T8 1150 (19:30:03)
+
+Crear perfil solo para diarios, recursos y subir minas
+
+
+Sacar quien NO esta en el wasap
+
+
+start.bat
+timeout 90 >nul
+cd "C:\ProgramData\GNBots\GnBots\"
+start GnBots.exe
+timeout 10
+curl 127.0.0.1:5508/start
+
+
+
+http://localhost:5508/ - returns OK if webserver is running
+http://localhost:5508/status - returns object with current bot status
+http://localhost:5508/start - start
+http://localhost:5508/stop - stop
+http://localhost:5508/sessions - gives a list with active sessions
+http://localhost:5508/sessions/1 - gives info about specific session(current account etc)
+http://localhost:5508/sessions/1/screenshot - gives you screen shot of specific session
+
+SamSun (Server Admin)
+
+
+Scotch reclutar revisar gathering
+N5 => bichos L2
+
+gather resources => tiene marches pero no tiene max marches
+
+items =>
+Mineral boost
+Mineral pack
+
+571.291
+578.293
+588.294
+590.264
+596.281
+603.277
+610.288

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pizza Map</title>
+</head>
+<body>
+  <div>
+  <input type="text" id="coordinates" placeholder="Coordinates (x, y)" onkeyup="checkCoordinates()">
+  => <span id="result">
+  </div>
+<canvas id="canvas" width="1200" height="1200" style="background-color: black;"></canvas>
+<script>
+  var paths = {}
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  // y coords should be reverted because canvas starts from upside down
+  var y_ = function (n) { return 1199 - n; }
+
+
+  var checkCoordinates = function () {
+    try {
+    var coordinates = document.getElementById("coordinates").value;
+      console.log(coordinates)
+    // regex = /[,\.;]/;
+
+    var x = parseInt(coordinates.split(":")[0].replace(/\D/g, ''));
+    var y = y_(parseInt(coordinates.split(":")[1].replace(/\D/g, '')));
+
+    var matches = []
+
+    for (var city of ['alloy', 'perpetual', 'watson']) {
+      if (ctx.isPointInPath(paths[city], x, y)) { console.log(city); matches.push(city) }
+    }
+
+    document.getElementById("result").innerHTML = matches.join(" & ");
+    } catch (e) { console.log(e)}
+  }
+
+
+  // Draw the first triangle
+  ctx.fillStyle = "red";
+  var alloy = new Path2D();
+  alloy.moveTo(0,   y_(0));
+  alloy.lineTo(198, y_(0));
+  alloy.lineTo(599, y_(599));
+  alloy.lineTo(198, y_(1199));
+  alloy.lineTo(0, y_(1199));
+  alloy.lineTo(0, y_(0));
+  alloy.closePath();
+
+  paths['alloy'] = alloy;
+
+  ctx.fillStyle = "red";
+  ctx.fill(alloy);
+  ctx.fillStyle = "black";
+  ctx.font = "40px serif";
+  ctx.fillText("Alloy", 198, y_(600));
+
+  // Draw the second triangle
+  var watson = new Path2D();
+  watson.moveTo(198,  y_(1199));
+  watson.lineTo(599,  y_(599));
+  watson.lineTo(1199, y_(599));
+  watson.lineTo(1199, y_(1199));
+  watson.lineTo(198,  y_(1199));
+  watson.closePath();
+
+  paths['watson'] = watson;
+
+  ctx.fillStyle = "green";
+  ctx.fill(watson);
+  ctx.fillStyle = "black";
+  ctx.fillText("Watson", 900, y_(900));
+
+<!-- // Draw the third triangle -->
+  var perpetual = new Path2D();
+<!-- perpetual.beginPath(); -->
+    perpetual.moveTo(198,  y_(0));
+  perpetual.lineTo(1199, y_(0));
+  perpetual.lineTo(1199, y_(599));
+  perpetual.lineTo(599,  y_(599));
+  perpetual.lineTo(198,  y_(0));
+  perpetual.closePath();
+
+  paths['perpetual'] = perpetual;
+
+  ctx.fillStyle = "blue";
+  ctx.fill(perpetual);
+  ctx.fillStyle = "white";
+  ctx.fillText("Perpetual", 900, y_(300));
+
+  var points = {}
+
+  for (i = 0; i < 1200; i++) {
+    for (j = 0; j < 1200; j++) {
+      var matches_ = []
+      for (var city of ['alloy', 'perpetual', 'watson']) {
+        if (ctx.isPointInPath(paths[city], i, y_(j))) {
+        points[city] = points[city] || 0;
+        points[city] += 1;
+        }
+      }
+
+      // if (matches_.length == 1) {
+      //   var city = matches_[0]
+        // points['compartidos'] = points['compartidos'] || [];
+        // points['compartidos'].push(`${i}:${y_(j)} entre ${matches_.join(" & ")}`)
+      // }
+    }
+  }
+
+  console.log(points)
+
+</script>
+</body>
+</html>

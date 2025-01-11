@@ -1,0 +1,16 @@
+[Unit]
+Description = Mount NFS Share
+# Requires=network-online.service
+# After=network-online.service
+After=NetworkManager.service
+
+[Mount]
+What=192.168.0.111:/media/Torrents
+Where=/home/rotsen/raspi
+Type=nfs
+Options=auto,nolock,bg,nfsvers=4,tcp,actimeo=1800,noatime,nodiratime,relatime,rsize=32768,wsize=32768
+# Uncomment the below if your server is real slow
+TimeoutSec=10
+
+[Install]
+WantedBy=multi-user.target

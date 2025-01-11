@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=CustomOpenLink
-Terminal=false
-Exec=/home/rotsen/bins/custom_open_link.rb %u
-Categories=Network;WebBrowser

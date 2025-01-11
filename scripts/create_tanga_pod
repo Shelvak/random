@@ -1,0 +1,16 @@
+#!/bin/bash
+
+NAME=tanga
+DIR="`(cd $(dirname "$0") && pwd)`"
+
+kubectl delete pod $NAME --grace-period 0
+
+rm -f /tmp/$NAME.yml
+echo -ne "1\n$NAME\n\n" | $DIR/createPod.sh
+
+mv $NAME.json /tmp/$NAME.json
+
+kubectl -n default apply -f /tmp/$NAME.json
+
+kubectl wait --for=condition=ready --timeout=60s pod $NAME
+kubectl exec -it $NAME bash

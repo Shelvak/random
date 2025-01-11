@@ -1,0 +1,7 @@
+#!/bin/bash
+# dd if=/dev/zero of=/swapfile1 bs=8M count=1024
+sudo fallocate -l 8G /swapfile1
+sudo chown root:root /swapfile1
+sudo chmod 0600 /swapfile1
+sudo mkswap /swapfile1
+sudo swapon /swapfile1

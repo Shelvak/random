@@ -1,0 +1,9 @@
+#!/bin/zsh
+
+alias kteiqui="kubectl --kubeconfig=/home/rotsen/.kube/teiqui --namespace production"
+kteiqui delete pod tq2-console --grace-period 0 2>/dev/null
+
+
+cat ~/git/tq2/manifests/pod.json | jq '.spec.containers[0].name = "tq2-console" | del(.spec.containers[0].args) | .spec.containers[0].command = ["/usr/bin/tail", "-F"] | .metadata.labels.app = "tq2-console" | .metadata.name = "tq2-console" | .metadata.namespace = "production"' | kteiqui apply -f -
+sleep 15
+kteiqui exec -it tq2-console -- ash

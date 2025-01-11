@@ -1,3 +1,0 @@
-#!/bin/bash
-
-curl -s "http://ACC:PASS@dynupdate.no-ip.com/nic/update?hostname=DOMAIN" > /dev/null
